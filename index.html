@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RemoveBG Clone</title>
+
+    <style>
+
+        #dropZone{
+    border:3px dashed #999;
+    padding:40px;
+    border-radius:12px;
+    cursor:pointer;
+    margin-bottom:20px;
+    background:white;
+}
+
+#dropZone:hover{
+    background:#f0f0f0;
+}
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        .container {
+            background: white;
+            width: 800px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        #downloadBtn {
+            background: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #loading {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .preview-section {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .preview-box {
+            width: 300px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>RemoveBG Clone</h1>
+
+        <p>
+            Upload an image and remove the background instantly.
+        </p>
+
+        <div id="dropZone">
+
+    <h3>📁 Upload Image</h3>
+
+    <p>Drag & Drop Image Here</p>
+
+    <p>or Click to Upload</p>
+
+    <input
+        type="file"
+        id="fileInput"
+        hidden>
+        <p id="fileName"></p>
+
+</div>
+
+        <br><br>
+
+        <button onclick="uploadImage()">
+            Remove Background
+        </button>
+
+        <p id="loading"></p>
+
+        <div id="previewContainer" style="display:none;">
+
+            <div class="preview-section">
+
+                <div class="preview-box">
+                    <h3>Original Image</h3>
+                    <img id="originalPreview">
+                </div>
+
+                <div class="preview-box">
+                    <h3>Background Removed</h3>
+                    <img id="result">
+                </div>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <a id="downloadBtn" download="output.png">
+            Download PNG
+        </a>
+
+    </div>
+
+    <script>
+        const dropZone =
+    document.getElementById("dropZone");
+
+const fileInput =
+    document.getElementById("fileInput");
+    fileInput.addEventListener(
+    "change",
+    () => {
+
+        if(fileInput.files.length > 0){
+
+            document.getElementById(
+                "fileName"
+            ).innerText =
+                fileInput.files[0].name;
+
+        }
+
+    }
+);
+
+dropZone.addEventListener(
+    "click",
+    () => fileInput.click()
+);
+
+dropZone.addEventListener(
+    "dragover",
+    (e) => {
+        e.preventDefault();
+    }
+);
+
+dropZone.addEventListener(
+    "drop",
+    (e) => {
+
+        e.preventDefault();
+
+        fileInput.files =
+            e.dataTransfer.files;
+
+    }
+);
+
+        async function uploadImage() {
+
+            const file =
+                document.getElementById("fileInput").files[0];
+
+            if (!file) {
+                alert("Please select an image first.");
+                return;
+            }
+
+            const originalUrl =
+                URL.createObjectURL(file);
+
+            document.getElementById(
+                "originalPreview"
+            ).src = originalUrl;
+
+            document.getElementById("loading").innerText =
+                "Removing Background...";
+
+            const formData = new FormData();
+
+            formData.append("file", file);
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/remove-bg",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const blob =
+                await response.blob();
+
+            const resultUrl =
+                URL.createObjectURL(blob);
+
+            document.getElementById("result").src =
+                resultUrl;
+
+            document.getElementById(
+                "previewContainer"
+            ).style.display = "block";
+
+            document.getElementById("downloadBtn").href =
+                resultUrl;
+
+            document.getElementById("downloadBtn").style.display =
+                "inline-block";
+
+            document.getElementById("loading").innerText =
+                "Done!";
+        }
+
+    </script>
+
+</body>
+
+</html>
